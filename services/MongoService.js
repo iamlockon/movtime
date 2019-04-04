@@ -12,7 +12,7 @@ class MongoService {
      * @returns Promise<bool>
      */
     isConnected() {
-        return Promise.resolve(this.mongoClient.isConnected())
+        return Promise.resolve(this.mongoClient.isConnected());
     }
 }
 module.exports = MongoService;

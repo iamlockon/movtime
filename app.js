@@ -1,4 +1,3 @@
-//PWD ALERT!!!
 const config = require('./configs/config');
 
 var createError = require('http-errors');

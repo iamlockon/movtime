@@ -1,3 +1,4 @@
+const getMovies = require('../utils/getMovies');
 var express = require('express');
 const UserRouter = require('./users');
 
@@ -8,7 +9,7 @@ const UserRouter = require('./users');
  * @param {MongoClient} dependencies.client
  */
 function createRouter(dependencies) {
-  const {mongoService, authRouter} = dependencies;
+  const {mongoService, authRouter, moviesDao} = dependencies;
   
   let router = express.Router();
   router.use('/api/auth', authRouter);
@@ -36,24 +37,14 @@ function createRouter(dependencies) {
 
   });
 
-  function middleware1(req, res, next) {
-    // 錯誤發生(一)
-    //throw new Error('fake error by throw'); 
-    
-    // 錯誤發生(二)
-    //next(new Error('fake error by next()'));
-    //return;
-
-    console.log('middleware1');
-    // res.send('搶先送出回應'); // 這會引起錯誤，但不中斷： Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client 
-    next(); // 引發下一個 middleware
-  }
-  function middleware2(req, res, next) {
-    console.log('middleware2');
-    next(); // 引發下一個 middleware
-  }
-  router.get('/api/middleware', middleware1, middleware2, function (res, res, next) {
-    res.send('done');
+  router.get('/utils/movies', async (req, res, next) => {
+    //TODO:Only privileged admin can call this endpoint.
+    try{
+      await getMovies(moviesDao);
+      res.send('done');
+    }catch(err) {
+      console.error("Failed in /utils/movies:", err);
+    }
   });
   router.use('/user', UserRouter);
   return router;
