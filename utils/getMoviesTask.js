@@ -22,12 +22,12 @@ async function getFilmID() {
                 }
         }).get();
     }catch(err) {
-        console.error("Failed to get Error ID: " ,err);
+        console.error("Failed to get Film ID: ");
     }
 }
 
 /**
- * #Crawl Movie data and use MoviesDAO to save them.
+ * #Crawl Movie data.
  *  http://www.atmovies.com.tw/movie/{filmID}/
  * 
  * @params {Array<Object>} data 
@@ -38,12 +38,10 @@ async function getFilmID() {
     data.forEach((ele) => {
         ret.push(new Promise(async (resolve, reject) => {
             let $ = null;
-            try{
-                const res = await axios.get(`http://www.atmovies.com.tw/movie/${ele.filmID}/`);
-                $ = cheerio.load(res.data);
-            }catch(e) {
-                reject(`Failed to get ${ele.filmID} data: `, e);
-            }
+            const res = await axios.get(`http://www.atmovies.com.tw/movie/${ele.filmID}/`);
+            if (!res) reject(res);
+            $ = cheerio.load(res.data);
+
             const overview = $('#filmTagBlock span')[2].firstChild.data.trim();
             const length = $('#filmTagBlock span .runtime li')[0].firstChild.data.split('：')[1];
 
@@ -77,6 +75,7 @@ async function getFilmID() {
                 length: length,
                 teaser_uri: (teaser_uri !== undefined ? teaser_uri.attribs.src : ""),
                 classing: classing,
+                lastModified: new Date(),
             });
         }));            
     });
@@ -84,20 +83,22 @@ async function getFilmID() {
  }
 
 //Run the program
-module.exports = async function getMovies(moviesDAO) {
-    try {
-        const data = await getFilmID();
-        const md = await getMovieData(data);
-        console.log("DELE");
-        moviesDAO.deleteAll()
-          .then(async ()=>{
-            //console.log("Expect 0: ", await moviesDAO.docCount());
-            return moviesDAO.insertMany(md);
-          })
-          .catch((e) => console.log(e));
-        
-    }catch(err) {
-        console.error("Failed to getFilmID/MovieData or dump movies data to DB: ", err);
-    }        
-}
+module.exports = {
+    getMovies: async function getMovies(moviesDAO) {
+        try {
+            const data = await getFilmID();
+            const md = await getMovieData(data);   //json array
+            //update movies
+            await moviesDAO.update(md);
+            //delete old ones
+            await moviesDAO.deleteOld();
+        }catch(err) {
+            console.error("Operation failed: ", err);
+        }        
+    },
+    getFilmID,
+    getMovieData,
+}  
+
+
 

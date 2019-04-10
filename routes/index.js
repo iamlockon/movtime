@@ -1,6 +1,5 @@
-const getMovies = require('../utils/getMovies');
+const getMovies = require('../utils/getMoviesTask');
 var express = require('express');
-const UserRouter = require('./users');
 
 /**
  * 
@@ -43,10 +42,9 @@ function createRouter(dependencies) {
       await getMovies(moviesDao);
       res.send('done');
     }catch(err) {
-      console.error("Failed in /utils/movies:", err);
+      next(err);
     }
   });
-  router.use('/user', UserRouter);
   return router;
 }
 
