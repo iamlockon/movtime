@@ -1,6 +1,6 @@
 //For modifying movies collection use.
 class MoviesDAO {
-    constructor(mongoClient) {
+    constructor({mongoClient}) {
         this.mongoClient = mongoClient;
     }
     /**
@@ -18,6 +18,32 @@ class MoviesDAO {
     findOld() {
         const collec = this.mongoClient.db('showtime').collection('movs');
         return collec.findOne({lastModified: { $lt: new Date(new Date().setDate(new Date().getDate()-1))}});
+    }
+    /**
+     * @param {Number} lat
+     * @param {Number} lng 
+     * @returns {Promise<Object>} theaters
+     */
+    async getNearbyTheaters(lat, lng, dist) {
+        const collec = this.mongoClient.db('showtime').collection('theaters');
+        const data  = await collec.find(
+            { 
+                "theaterInfo.3.location" : { 
+                    $near : {
+                        $geometry: {
+                            type: "Point",
+                            coordinates: [ Number(lng), Number(lat) ]
+                        },
+                        $maxDistance: dist * 1000,
+                        $minDistance: 0
+                    }
+                }
+            },
+            
+        ).project({
+            _id: 0, name: 1, "theaterInfo": 1
+        }).toArray();
+        return data;
     }
     /**
      * 

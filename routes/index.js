@@ -6,6 +6,7 @@ var express = require('express');
  * @param {object} dependencies
  * @param {MongoService} dependencies.mongoService
  * @param {MongoClient} dependencies.client
+ * @param {MoviesDAO} dependencies.moviesDao
  */
 function createRouter(dependencies) {
   const {mongoService, authRouter, moviesDao} = dependencies;
@@ -30,7 +31,12 @@ function createRouter(dependencies) {
   });
 
   router.get('/theaters',(req,res, next) => {
-    res.send('hi');
+    const {lat, lng, dist} = req.query; 
+    mongoService.getNearbyTheaters(lat, lng, dist)
+      .then((theaters) => {
+        res.json(theaters);
+      })
+      .catch(next);
   });
   router.get('/movies', (req, res, next)=>{
 

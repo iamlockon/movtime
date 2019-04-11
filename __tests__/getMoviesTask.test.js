@@ -45,7 +45,7 @@ test('getMovies should update & delete old movies', async () => {
     const moviesDAO = new MoviesDAO(connection);
     //insert an old movie
     
-    await moviesDAO.insertOne({
+    const m = await moviesDAO.insertOne({
     title: 'Example',
     filmID : 'ddd',
     overview: 'asdfadf',
@@ -54,7 +54,7 @@ test('getMovies should update & delete old movies', async () => {
     classing: 'fff',
     lastModified: new Date(new Date().setDate(new Date().getDate()-2)),
     });
-    
+    expect(m.result.ok).toBe(1);
     expect(await moviesDAO.findOld()).not.toBeNull();
     try{
         await getMovies(moviesDAO);
