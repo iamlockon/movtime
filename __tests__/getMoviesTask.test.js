@@ -1,18 +1,17 @@
 import {getFilmID, getMovieData, getMovies} from '../utils/getMoviesTask';
 import MoviesDAO from '../daos/MoviesDAO';
 import {MongoClient} from 'mongodb';
-import { JestEnvironment } from '@jest/environment';
 
-let connection;
+let mongoClient;
 let db;
 
 beforeAll(async () => {
-    connection = await MongoClient.connect(global.__MONGO_URI__, { useNewUrlParser: true });
-    db = await connection.db(global.__MONGO_DB_NAME__);
+    mongoClient = await MongoClient.connect(global.__MONGO_URI__, { useNewUrlParser: true });
+    db = await mongoClient.db(global.__MONGO_DB_NAME__);
 });
 
 afterAll(async () => {
-    await connection.close();
+    await mongoClient.close();
 
 });
 
@@ -42,7 +41,7 @@ test('getMovieData should return a non-empty array with movie data', async () =>
 });
 
 test('getMovies should update & delete old movies', async () => {
-    const moviesDAO = new MoviesDAO(connection);
+    const moviesDAO = new MoviesDAO({mongoClient});
     //insert an old movie
     
     const m = await moviesDAO.insertOne({

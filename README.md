@@ -10,8 +10,9 @@ Retrieve the theaters within predefined distance. (default 5 km)
 query parameters: lat, lng, dist; (optional) user
 
 
-GET /movies
+2. GET /movies?lat=<lat>&lng=<lng>&dist=<dist>
 retrieve the movies currently on nearby(distance configurable if is registered)
+
 GET /about
 about page.
 GET /poster?filmID=
@@ -47,3 +48,5 @@ check if logged in.
 1. Use Jest with Babel 7. 
 2. The files in jest folder are for JEST configuration use.
 3. Since mongo-memory-server need to create temp folder .cache in node_modules, need to run tests with sudo.
+4. Run "node --inspect-brk node_modules/.bin/jest --runInBand" in terminal first, then debug in vscode.
+(Refer to:https://jestjs.io/docs/en/troubleshooting)
